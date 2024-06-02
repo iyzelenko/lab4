@@ -1,0 +1,109 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// Матричный метод
+vector<double> matrix_method(vector<vector<double>>& A, vector<double>& b) {
+    int n = A.size();
+
+    // Прямой ход
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            double multiplier = A[j][i] / A[i][i];
+            for (int k = 0; k < n; k++) {
+                A[j][k] -= multiplier * A[i][k];
+            }
+            b[j] -= multiplier * b[i];
+        }
+    }
+
+    // Обратный ход
+    vector<double> x(n);
+    for (int i = n - 1; i >= 0; i--) {
+        double sum = 0;
+        for (int j = i + 1; j < n; j++) {
+            sum += A[i][j] * x[j];
+        }
+        x[i] = (b[i] - sum) / A[i][i];
+    }
+
+    return x;
+}
+
+// Метод Гаусса
+vector<double> gauss_method(vector<vector<double>>& A, vector<double>& b) {
+    int n = A.size();
+
+    // Прямой ход
+    for (int i = 0; i < n; i++) {
+        // Находим максимальный элемент в столбце
+        int max_row = i;
+        for (int j = i + 1; j < n; j++) {
+            if (abs(A[j][i]) > abs(A[max_row][i])) {
+                max_row = j;
+            }
+        }
+
+        // Меняем местами строки с максимальным и текущим элементами
+        if (max_row != i) {
+            for (int k = 0; k < n; k++) {
+                swap(A[i][k], A[max_row][k]);
+            }
+            swap(b[i], b[max_row]);
+        }
+
+        // Вычитаем из всех остальных строк кратные текущей строки, чтобы получить нули под диагональю
+        for (int j = i + 1; j < n; j++) {
+            double multiplier = A[j][i] / A[i][i];
+            for (int k = 0; k < n; k++) {
+                A[j][k] -= multiplier * A[i][k];
+            }
+            b[j] -= multiplier * b[i];
+        }
+    }
+
+    // Обратный ход
+    vector<double> x(n);
+    for (int i = n - 1; i >= 0; i--) {
+        double sum = 0;
+        for (int j = i + 1; j < n; j++) {
+            sum += A[i][j] * x[j];
+        }
+        x[i] = (b[i] - sum) / A[i][i];
+    }
+
+    return x;
+}
+
+int main() {
+    // Коэффициенты системы
+    vector<vector<double>> A = {
+        {-2, -1, -9, -5},
+        {-4, 4, -2, 6},
+        {0, 5, 7, -4},
+        {0, 9, 7, 7}
+    };
+
+    // Правые части
+    vector<double> b = {93, 16, -80, -119};
+
+    // Решение системы матричным методом
+    vector<double> x_matrix = matrix_method(A, b);
+
+    // Решение системы методом Гаусса
+    vector<double> x_gauss = gauss_method(A, b);
+
+    // Вывод результатов
+    cout << "Матричный метод:" << endl;
+    for (int i = 0; i < x_matrix.size(); i++) {
+        cout << "x" << i + 1 << " = " << x_matrix[i] << endl;
+    }
+
+    cout << "\nМетод Гаусса:" << endl;
+    for (int i = 0; i < x_gauss.size(); i++) {
+        cout << "x" << i + 1 << " = " << x_gauss[i] << endl;
+    }
+
+    return 0;
+}
