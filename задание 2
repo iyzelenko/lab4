@@ -1,0 +1,70 @@
+import numpy as np
+from scipy.linalg import lu
+
+# Определяем систему линейных алгебраических уравнений
+A = np.array([[3, 12, -5],
+              [3, 5, -2],
+              [-1, 2, -1]], dtype=float)
+b = np.array([1, 1, 1], dtype=float)
+
+# Метод Крамера
+def cramer(A, b):
+    """
+    Решает систему линейных алгебраических уравнений методом Крамера.
+
+    Args:
+        A (numpy.ndarray): Матрица коэффициентов.
+        b (numpy.ndarray): Вектор свободных членов.
+
+    Returns:
+        numpy.ndarray: Вектор решений.
+    """
+    n = A.shape[0]
+    det_A = np.linalg.det(A)
+    if det_A == 0:
+        raise ValueError("Матрица вырожденная.")
+
+    x = np.zeros(n)
+    for i in range(n):
+        A_i = A.copy()
+        A_i[:, i] = b
+        x[i] = np.linalg.det(A_i) / det_A
+
+    return x
+
+# Метод Якоби
+def jacobi(A, b, tol=1e-6, max_iter=1000):
+    """
+    Решает систему линейных алгебраических уравнений методом Якоби.
+
+    Args:
+        A (numpy.ndarray): Матрица коэффициентов.
+        b (numpy.ndarray): Вектор свободных членов.
+        tol (float, optional): Точность решения. По умолчанию 1e-6.
+        max_iter (int, optional): Максимальное количество итераций. По умолчанию 1000.
+
+    Returns:
+        numpy.ndarray: Вектор решений.
+    """
+    n = A.shape[0]
+    x = np.zeros(n)
+    x_prev = np.zeros(n)
+
+    for k in range(max_iter):
+        for i in range(n):
+            x_prev[i] = x[i]
+            x[i] = (b[i] - np.sum(A[i, np.arange(n) != i] * x[np.arange(n) != i])) / A[i, i]
+
+        if np.linalg.norm(x - x_prev) < tol:
+            return x
+
+    raise ValueError("Метод не сходится.")
+
+
+# Решаем систему методом Крамера
+print("Решение методом Крамера:")
+print(cramer(A, b))
+
+# Решаем систему методом Якоби
+print("Решение методом Якоби:")
+print(jacobi(A, b))
